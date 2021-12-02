@@ -1,0 +1,29 @@
+---
+- hosts: all
+  become: true
+  
+  tasks:
+  - name: copy file
+    copy:
+      src: /home/ansadmin/Dockerfile
+      dest: /opt/docker
+    ignore_errors: yes
+  
+  - name: stop current running container
+    command: docker stop myappcontainer
+    ignore_errors: yes
+
+  - name: remove stopped container
+    command: docker rm myappcontainer
+    ignore_errors: yes
+
+  - name: remove docker image
+    command: docker rmi myappimage
+
+  - name: build docker image using war file
+    command: docker build -t myappimage .
+    args:
+      chdir: /opt/docker
+
+  - name: create container using myappcontainer
+    command: docker run -d --name myappcontainer -p 8080:8080 myappimage
